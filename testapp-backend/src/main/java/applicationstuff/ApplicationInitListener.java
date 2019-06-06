@@ -7,6 +7,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 
 import authentication.AccessControl;
 import authentication.AccessControlFactory;
+import views.LoginView;
 import views.MainView;
 
 /**
@@ -26,9 +27,8 @@ public class ApplicationInitListener implements VaadinServiceInitListener {
             uiInitEvent.getUI().addBeforeEnterListener(enterEvent -> {
                 logger.info("");
 
-                 //Not needed, rerouting is handled within the before listener of each view
                 if (!accessControl.isUserSignedIn()) {
-                    enterEvent.rerouteTo(MainView.class);
+                    enterEvent.rerouteTo(LoginView.class);
                 }                   
             });
         });

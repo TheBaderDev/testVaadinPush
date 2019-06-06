@@ -43,8 +43,8 @@ public class BasicAccessControl implements AccessControl {
 	}
 
 	@Override
-	public boolean signIn(String username, String password) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean signIn(String name) {
+		CurrentUser.set(name);
+		return true;
 	}
 }

@@ -10,16 +10,23 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import applicationstuff.Broadcaster;
+import authentication.AccessControlFactory;
+import authentication.CurrentUser;
 
 @Route("")
 @PageTitle("MainView")
 @Push
-public class MainView extends VerticalLayout{
-    Registration broadcasterRegistration;
+public class MainView extends VerticalLayout implements BeforeLeaveObserver, BeforeEnterObserver {
+	private static final long serialVersionUID = 1L;
+	Registration broadcasterRegistration;
     VerticalLayout messages = new VerticalLayout();
 
 	public MainView() {
@@ -27,16 +34,13 @@ public class MainView extends VerticalLayout{
 		
 		TextField message = new TextField();
 	    Button send = new Button("Send", e -> {
-	        Broadcaster.broadcast(message.getValue());
+	        Broadcaster.broadcast(CurrentUser.get() + ":    " + message.getValue());
 	        message.setValue("");
 	    });
 
 	    HorizontalLayout sendBar = new HorizontalLayout(message, send);
-
 	    add(label, sendBar, messages);
 	}
-	
-	
 	
 	@Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -51,4 +55,18 @@ public class MainView extends VerticalLayout{
         broadcasterRegistration.remove();
         broadcasterRegistration = null;
     }
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent event) {
+		authentication.AccessControl accessControl = AccessControlFactory.getInstance().getAccessControl();
+		accessControl.signOut();
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		authentication.AccessControl accessControl = AccessControlFactory.getInstance().getAccessControl();
+		if(!accessControl.isUserSignedIn()) {
+			event.rerouteTo(LoginView.class);
+		}
+	}
 }
